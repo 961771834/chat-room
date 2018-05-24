@@ -1,7 +1,8 @@
 
-let currentRoom = {};
-let nickNames = {};
-let nameUsed = {};
+
+
+
+
 function assginGuestName(socket,guestNumber,nickNames,nameUsed){
   const name = 'Guest' + guestNumber;
   nickNames[socket.id] = name;
@@ -42,7 +43,7 @@ function joinRoom(io,socket,room){
   socket.emit('message', { text: userInRoomSummary});
 }
 
-function handleNameChangeAttemps(socket,nickNames,nameUsed){
+function handleNameChangeAttemps(socket,nickNames,nameUsed,currentRoom){
   socket.on('nameAttempt',function(name){
     if(name.indexOf('Guest') === 0){
       socket.emit('nameResult',{
@@ -74,7 +75,7 @@ function handleNameChangeAttemps(socket,nickNames,nameUsed){
   })
 }
 
-function handleMessageBroadcasting(socket){
+function handleMessageBroadcasting(socket,nickNames){
   socket.on('message',function(message){
     socket.broadcast.to(message.room).emit('message',{
       text:nickNames[socket.id] + ':' + message.text 
@@ -82,17 +83,31 @@ function handleMessageBroadcasting(socket){
   })
 }
 
-function handleRoomJoining(socket){
+function handleRoomJoining(io,socket,currentRoom){
   socket.on('join',function(room){
       socket.leave(currentRoom[socket.io]);
+      joinRoom(io, socket, room.newRoom);
+  })
+}
+
+
+function handleClientDisconnection(socket,nameUsed,nickNames){
+  socket.on('disconnect',function(){
+    const nameIndex = nameUsed.indexOf(nickNames[socket.id]);
+
+    delete nameUsed[nameIndex];
+
+    delete nickNames[socket.id];
   })
 }
 
 
 
 module.exports = {
+  handleNameChangeAttemps,
+  handleMessageBroadcasting,
+  handleRoomJoining,
   assginGuestName,
   joinRoom,
-  handleNameChangeAttemps,
-  handleMessageBroadcasting
+  handleClientDisconnection
 }
