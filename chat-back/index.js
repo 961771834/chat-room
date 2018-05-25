@@ -11,25 +11,21 @@ app.get('/', function (req, res) {
 });
 
 let guestNumber = 1;
-let currentRoom = {};
-let nickNames = {};
-let nameUsed = {};
 
 io.on('connection', function (socket) {
-  
-  guestNumber = chatServer.assginGuestName(socket.guestNumber,nickNames,nameUsed);
+  guestNumber = chatServer.assginGuestName(socket,guestNumber);
 
   chatServer.joinRoom(io,socket,'Lobby');
 
-  chatServer.handleMessageBroadcasting(socket,nickNames);
+  chatServer.handleMessageBroadcasting(socket);
 
-  chatServer.handleNameChangeAttemps(socket,nickNames,nameUsed,currentRoom);
+  chatServer.handleNameChangeAttemps(socket);
 
-  chatServer.handleRoomJoining(io,socket,currentRoom);
+  chatServer.handleRoomJoining(io,socket);
 
   socket.on('rooms',function(){
     socket.emit('rooms',io.sockets.manager.rooms);
   });
 
-  chatServer.handleClientDisconnection(socket,nameUsed,nickNames);
+  chatServer.handleClientDisconnection(socket);
 });

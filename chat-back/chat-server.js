@@ -1,9 +1,9 @@
 
+let currentRoom = {};
+let nickNames = {};
+let nameUsed = [];
 
-
-
-
-function assginGuestName(socket,guestNumber,nickNames,nameUsed){
+function assginGuestName(socket,guestNumber){
   const name = 'Guest' + guestNumber;
   nickNames[socket.id] = name;
   socket.emit('nameResult',{
@@ -22,10 +22,18 @@ function joinRoom(io,socket,room){
     text:nickNames[socket.id] + 'has joined' + room + '.'
   });
 
-  const userInRoom = io.sockets.clients(room);
+  let userInRoom = [];
+  // TODO: 去了解clients是否是在该namespace下面的;
+  io.clients((error, clients) => {
+    if (error) throw error;
+    console.log(clients); // => [6em3d4TJP8Et9EMNAAAA, G5p55dHhGgUnLUctAAAB]
+
+    userInRoom = clients;
+  });
+  
+  let userInRoomSummary = 'Users currently in' + room + ';'
 
   if(userInRoom.length > 1){
-    const userInRoomSummary = 'Users currently in' + room + ';'
 
     for(let index in userInRoom){
       const userSocketId = userInRoom[index].id;
@@ -43,7 +51,7 @@ function joinRoom(io,socket,room){
   socket.emit('message', { text: userInRoomSummary});
 }
 
-function handleNameChangeAttemps(socket,nickNames,nameUsed,currentRoom){
+function handleNameChangeAttemps(socket){
   socket.on('nameAttempt',function(name){
     if(name.indexOf('Guest') === 0){
       socket.emit('nameResult',{
@@ -75,15 +83,16 @@ function handleNameChangeAttemps(socket,nickNames,nameUsed,currentRoom){
   })
 }
 
-function handleMessageBroadcasting(socket,nickNames){
+function handleMessageBroadcasting(socket){
   socket.on('message',function(message){
+    console.log(message);
     socket.broadcast.to(message.room).emit('message',{
       text:nickNames[socket.id] + ':' + message.text 
     })
   })
 }
 
-function handleRoomJoining(io,socket,currentRoom){
+function handleRoomJoining(io,socket){
   socket.on('join',function(room){
       socket.leave(currentRoom[socket.io]);
       joinRoom(io, socket, room.newRoom);
@@ -91,7 +100,7 @@ function handleRoomJoining(io,socket,currentRoom){
 }
 
 
-function handleClientDisconnection(socket,nameUsed,nickNames){
+function handleClientDisconnection(socket){
   socket.on('disconnect',function(){
     const nameIndex = nameUsed.indexOf(nickNames[socket.id]);
 

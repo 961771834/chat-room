@@ -2,7 +2,7 @@
   <div class="chat-room-footer">
     <div class="send-from">
       <el-input v-model="input" placeholder="请输入内容" class="chat-input">
-        <el-button slot="append" >Send</el-button>
+        <el-button slot="append" v-on:click="handleOnClick" >Send</el-button>
       </el-input>
     </div>
     <div class="send-help">
@@ -41,13 +41,13 @@ export default {
     }
   },
   props:['websocket'],
-  // processCommand(command){
-  //   // const words = command.split(' ');
-  //   // const handleCommand = words[0].substring(1,words[0].length).toLowerCase();
+  methods:{
+      handleOnClick(){
+          this.$emit('onClickAction',this.input);
 
-  //   // const message = false;
-
-  // }
+          this.input = '';
+      }
+  },
   mounted(){
     console.log(this.websocket);
   }

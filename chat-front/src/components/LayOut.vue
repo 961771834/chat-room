@@ -6,10 +6,10 @@
         <el-aside width="200px">Aside</el-aside>
         <el-container class="chat-main-right" >
           <el-main>
-            <ChatRoomMain v-bind:websocket="websock"/>
+            <ChatRoomMain v-bind:message="message" v-bind:rooms="rooms" v-bind:room="room"/>
           </el-main>
           <el-footer height='190px'>
-            <ChatRoomFooter v-bind:websocket="websock"/>
+            <ChatRoomFooter v-on:onClickAction="onClickAction"/>
           </el-footer>
         </el-container>
       </el-container>
@@ -65,7 +65,10 @@
     name: 'LayOut',
     data() {
       return {
-          websock: null,
+          websocket: null,
+          message:'',
+          room:'',
+          rooms:[]
       }
     },
     components:{
@@ -73,9 +76,83 @@
       ChatRoomMain
     },
     created(){
-      const socket = 'ws://localhost:80/df';
-      this.websock =  new WebSocket(socket);
-      // console.log(this.websock);
+      this.websocket =  this.$socket;
+      this.websocket.on('nameResult',(result)=>{
+        if(result.success){
+          this.message = 'You are known as ' + result.name + '.';
+        }else{
+          this.message = result.message;
+        }
+      });
+      this.websocket.on('joinResult',(result)=>{
+          this.room = result.room;
+      });
+      this.websocket.on('message',(message)=>{
+          this.message = message.text;
+      })
+
+      this.websocket.on('rooms',(rooms)=>{
+        console.log(rooms);
+      })
+    },
+    methods:{
+      sendMessage(room,text){
+         const message = {
+           room,text
+         }
+
+         this.websocket.emit('message',message);
+      },
+      changeRoom(room){
+        this.websocket.emit('join',{
+          newRoom:room
+        });
+      },
+      processCommand(command){
+        const words = command.split(' ');
+        const handleCommand = words[0].substring(1,words[0].length).toLowerCase();
+
+        let message = false;
+
+        switch (handleCommand) {
+          case 'join':
+            {
+              words.shift();
+              const room = words.join();
+              this.changeRoom(room);
+              break;
+            }
+
+          case 'nick':
+            {
+              words.shift();
+              const name = words.join();
+              this.websocket.emit('nameAttemp', name);
+              break;
+            }
+
+          default:
+            {
+              message = 'Unrecongized command';
+              break;
+            }
+        }
+
+        return message;      
+      },
+      onClickAction(command){
+        let systemMessage;
+        if(command && command.charAt(0) == '/'){
+            //命令处理
+            systemMessage = this.processCommand(command);
+            if(systemMessage){
+              this.message = systemMessage;
+            }
+        }else{
+          // 发送消息
+          this.sendMessage(this.room,command);
+        }
+      }
     }
   }
 </script>
