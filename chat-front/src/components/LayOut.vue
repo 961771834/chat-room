@@ -6,7 +6,7 @@
         <el-aside width="200px">Aside</el-aside>
         <el-container class="chat-main-right" >
           <el-main>
-            <ChatRoomMain v-bind:message="message" v-bind:rooms="rooms" v-bind:room="room"/>
+            <ChatRoomMain v-bind:message="message" v-bind:messages="messages" v-bind:room="room"/>
           </el-main>
           <el-footer height='190px'>
             <ChatRoomFooter v-on:onClickAction="onClickAction"/>
@@ -36,7 +36,6 @@
       background-color: #E9EEF3;
       color: #333;
       text-align: center;
-      line-height: 160px;
     }
     body>.el-container {
       margin-bottom: 40px;
@@ -68,7 +67,9 @@
           websocket: null,
           message:'',
           room:'',
-          rooms:[]
+          rooms:[],
+          name:'',
+          messages:[]
       }
     },
     components:{
@@ -80,6 +81,8 @@
       this.websocket.on('nameResult',(result)=>{
         if(result.success){
           this.message = 'You are known as ' + result.name + '.';
+          this.messages= [...this.messages,'You are known as ' + result.name + '.']
+          this.name = result.name;
         }else{
           this.message = result.message;
         }
@@ -88,20 +91,24 @@
           this.room = result.room;
       });
       this.websocket.on('message',(message)=>{
-          this.message = message.text;
-      })
 
-      this.websocket.on('rooms',(rooms)=>{
-        console.log(rooms);
-      })
+          this.messages= [...this.messages,message.text]
+          this.message = message.text;
+      });
+
+      // this.websocket.on('rooms',(rooms)=>{
+      //   console.log(rooms);
+      // })
     },
     methods:{
       sendMessage(room,text){
          const message = {
            room,text
          }
-
+        
          this.websocket.emit('message',message);
+         this.message = this.name + ":" + text;
+         this.messages= [...this.messages,this.name + ":" + text]
       },
       changeRoom(room){
         this.websocket.emit('join',{

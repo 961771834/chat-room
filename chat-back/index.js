@@ -19,13 +19,13 @@ io.on('connection', function (socket) {
 
   chatServer.handleMessageBroadcasting(socket);
 
-  chatServer.handleNameChangeAttemps(socket);
+  // chatServer.handleNameChangeAttemps(socket);
 
-  chatServer.handleRoomJoining(io,socket);
+  // chatServer.handleRoomJoining(io,socket);
 
-  socket.on('rooms',function(){
-    socket.emit('rooms',io.sockets.manager.rooms);
-  });
+  // socket.on('rooms',function(){
+  //   socket.emit('rooms',io.sockets.manager.rooms);
+  // });
 
-  chatServer.handleClientDisconnection(socket);
+  // chatServer.handleClientDisconnection(socket);
 });

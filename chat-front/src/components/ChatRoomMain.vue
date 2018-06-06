@@ -2,15 +2,29 @@
   <div class="chat-room-main">
     <div class='room'>{{room}}</div>
     <div class='room-list'></div>
-    <div class='messages'>{{message}}</div>
+    <ul class='messages'>
+      <li v-for="item in messages" :key="item">
+        {{ item }}
+      </li>
+    </ul>
   </div>
 </template>
+<style lang="scss">
+  .chat-room-main{
+    .messages{
+      list-style: none;
+      li{
+        list-style: none;
+      }
+    }
+  }
+</style>
 <script>
 export default {
   name:'ChatRoomMain',
-  props:['message','room','rooms'],
+  props:['room','messages'],
   mounted(){
-    console.log(this.message)
+    console.log(this.messages)
   }
 }
 </script>

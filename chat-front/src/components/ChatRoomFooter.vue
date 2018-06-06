@@ -40,7 +40,6 @@ export default {
       input: ''
     }
   },
-  props:['websocket'],
   methods:{
       handleOnClick(){
           this.$emit('onClickAction',this.input);
@@ -49,7 +48,6 @@ export default {
       }
   },
   mounted(){
-    console.log(this.websocket);
   }
   
 }
