@@ -1,7 +1,11 @@
 <template>
   <div class="chat-room-main">
     <div class='room'>{{room}}</div>
-    <div class='room-list'></div>
+    <ul class='rooms'>
+      <li v-for="item in rooms" :key="item">
+        {{ item }}
+      </li>
+    </ul>
     <ul class='messages'>
       <li v-for="item in messages" :key="item">
         {{ item }}
@@ -22,7 +26,7 @@
 <script>
 export default {
   name:'ChatRoomMain',
-  props:['room','messages'],
+  props:['room','messages','rooms'],
   mounted(){
     console.log(this.messages)
   }

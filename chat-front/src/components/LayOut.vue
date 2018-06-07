@@ -6,7 +6,7 @@
         <el-aside width="200px">Aside</el-aside>
         <el-container class="chat-main-right" >
           <el-main>
-            <ChatRoomMain v-bind:message="message" v-bind:messages="messages" v-bind:room="room"/>
+            <ChatRoomMain v-bind:message="message" v-bind:messages="messages" v-bind:rooms="rooms"  v-bind:room="room"/>
           </el-main>
           <el-footer height='190px'>
             <ChatRoomFooter v-on:onClickAction="onClickAction"/>
@@ -84,7 +84,7 @@
           this.messages= [...this.messages,'You are known as ' + result.name + '.']
           this.name = result.name;
         }else{
-          this.message = result.message;
+          this.messages =[...this.messages,result.message];
         }
       });
       this.websocket.on('joinResult',(result)=>{
@@ -96,9 +96,13 @@
           this.message = message.text;
       });
 
-      // this.websocket.on('rooms',(rooms)=>{
-      //   console.log(rooms);
-      // })
+      this.websocket.on('rooms',(rooms)=>{
+          this.rooms = rooms;
+      });
+
+      setInterval( ()=> {
+          this.websocket.emit('rooms');
+      },1000)
     },
     methods:{
       sendMessage(room,text){
@@ -134,7 +138,7 @@
             {
               words.shift();
               const name = words.join();
-              this.websocket.emit('nameAttemp', name);
+              this.websocket.emit('nameAttempt', name);
               break;
             }
 
@@ -153,7 +157,7 @@
             //命令处理
             systemMessage = this.processCommand(command);
             if(systemMessage){
-              this.message = systemMessage;
+              this.messages = [...this.messages,systemMessage];
             }
         }else{
           // 发送消息
