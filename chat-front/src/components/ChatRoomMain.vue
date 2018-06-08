@@ -1,11 +1,7 @@
 <template>
   <div class="chat-room-main">
     <div class='room'>{{room}}</div>
-    <ul class='rooms'>
-      <li v-for="item in rooms" :key="item">
-        {{ item }}
-      </li>
-    </ul>
+
     <ul class='messages'>
       <li v-for="item in messages" :key="item">
         {{ item }}
